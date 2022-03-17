@@ -8,7 +8,7 @@ public class Libro
     private String autor;
     private int numpaginas; 
     private int sd;
-    
+    private int ds;
     //Constructor por defecto
 
     public Libro() {
