@@ -7,6 +7,7 @@ public class Libro
     private String titulo;
     private String autor;
     private int numpaginas; 
+    private int sd;
     
     //Constructor por defecto
 
