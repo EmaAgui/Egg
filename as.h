@@ -165,7 +165,7 @@ void trozarPedidos(char *linea, Pedidos *ped)
 
 int actualizarEnArbol(Arbol *pArbol, void *dato, unsigned tamBytes,
                       int(*cmp)(const void *dato1, const void *dato2),
-                      void(*acum)(void* dato, void* dato2))
+                      void(*acum)(void* dato, void* dato2, void *p), Cola *pc)
 {
     int comp; ///variable de compacion
 
@@ -178,7 +178,7 @@ int actualizarEnArbol(Arbol *pArbol, void *dato, unsigned tamBytes,
             pArbol = &(*pArbol)->der;
         else
         {
-            acum(dato, (*pArbol)->info);
+            acum(dato, (*pArbol)->info, pc);
             return 1;
         }
     }
@@ -849,4 +849,19 @@ istream& operator >>(istream &is, StockItem &sto)
     is >> sto.nArticulos;
 
     return is;
+}
+
+
+Fecha& Fecha::operator ++() //preincremento ++fecha
+{
+	++this->diaRel;
+	return *this;
+}
+
+
+Fecha Fecha::operator ++(int) //postincremento fecha++
+{
+	Fecha f(*this);
+	++this->diaRel;
+	return f;
 }
