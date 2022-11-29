@@ -851,6 +851,256 @@ istream& operator >>(istream &is, StockItem &sto)
     return is;
 }
 
+///Lista Simple
+typedef struct sNodo
+{
+    void *info;
+    unsigned tamInfo;
+    struct sNodo *sig;
+}tNodo;
+
+
+typedef tNodo *Lista;
+
+#include "ListaSimple.h"
+
+
+int insertarOrdenado(Lista *pl, const void *dato, unsigned tamBytes, int cmp(const void *dato1, const void *dato2))
+{
+    tNodo *nue;
+
+    while (*pl && cmp(dato, (*pl)->info) > 0)
+    {
+        pl = &(*pl)->sig;
+    }
+    nue = (tNodo*)malloc(sizeof(tNodo));
+    if (!nue)
+    {
+        return 0;
+    }
+
+    nue->info = malloc(tamBytes);
+    if (!nue->info)
+    {
+        free(nue);
+        return 0;
+    }
+
+    memcpy(nue->info, dato, tamBytes);
+    nue->tamInfo = tamBytes;
+    nue->sig = *pl;
+    *pl = nue;
+
+    return 1;
+}
+
+
+void filtrar(Lista *pl, const void *vComp, int ffiltro(const void *dato1, const void *dato2))
+{
+    tNodo *elim;
+
+    while (*pl)
+    {
+        if(ffiltro(vComp, (*pl)->info))
+        {
+            elim = *pl;
+            *pl = (*pl)->sig;
+            free(elim->info);
+            free(elim);
+        }
+        else
+        {
+            pl = &(*pl)->sig;
+        }
+    }
+}
+
+
+void recorrerRec(Lista *pl, void accion(void *dato))
+{
+    if(!*pl)
+        return;
+
+    recorrerRec(&(*pl)->sig, accion);
+    accion((*pl)->info);
+}
+
+
+void recorrer(Lista *pl, void accion(void *dato))
+{
+    while (*pl)
+    {
+        accion((*pl)->info);
+        pl = &(*pl)->sig;
+    }
+}
+
+
+int insertarAlPrincipio(Lista *pl, const void *dato, unsigned tamBytes)
+{
+    tNodo *nue = malloc(sizeof(tNodo));
+
+    if(nue == NULL)
+        return 0;
+
+    nue->info = malloc(tamBytes);
+
+    if(nue->info == NULL)
+    {
+        free(nue);
+        return 0;
+    }
+    memcpy(nue->info, dato, tamBytes);
+    nue->tamInfo = tamBytes;
+    nue->sig = *pl;
+    *pl = nue;
+
+    return 1;
+}
+
+
+void ordenar(Lista* pl, int comp(const void *d1, const void *d2))
+{
+    tNodo* nodo; ///nodo actual
+    Lista lOrd = NULL; //creo una lista
+    Lista* plOrd;   ///puntero a lista ordenada
+
+    while (*pl) /// *pl != NULL
+    {
+        nodo = *pl; ///nodo actual
+        *pl = nodo->sig;/// avanza el puntero de la lista
+        plOrd = &lOrd; ///puntero a lista ordenada
+
+        while (*plOrd && comp(nodo->info, (*plOrd)->info) > 0) ///mientras que el puntero de la lista ordenada no sea NULL y el dato del nodo actual sea mayor al dato del nodo de la lista ordenada, igual que insertarOrdenado
+            plOrd = &(*plOrd)->sig; ///avanza el puntero de la lista ordenada
+
+        nodo->sig = *plOrd;///el nodo actual apunta al nodo de la lista ordenada
+        *plOrd = nodo;///el puntero de la lista ordenada apunta al nodo actual
+    }
+
+    *pl = lOrd;//la lista original apunta a la lista ordenada
+}
+
+
+int verUltimo(const Lista *pl, void *dato, unsigned tamBytes)
+{
+    if(*pl == NULL)
+        return 0;
+
+    while ((*pl)->sig)
+        pl = &(*pl)->sig;
+
+    memcpy(dato, (*pl)->info, minimo(tamBytes, (*pl)->tamInfo));
+
+    return 1;
+}
+
+
+int sacarUltimo(Lista *pl, void *dato, unsigned tamBytes)
+{
+    if(*pl == NULL)
+        return 0;
+
+    while ((*pl)->sig)
+        pl = &(*pl)->sig;
+
+    memcpy(dato, (*pl)->info, minimo((*pl)->tamInfo, tamBytes));
+    free((*pl)->info);
+    free(*pl);
+    *pl = NULL;
+
+    return 1;
+}
+
+
+int ponerAlfinal(Lista *pl, const void *dato, unsigned tamBytes)
+{
+    tNodo *fin;
+
+    while (*pl)
+        pl = &(*pl)->sig;
+
+    fin = malloc(sizeof(tNodo));
+    if(fin == NULL)
+        return 0;
+
+    fin->info = malloc(tamBytes);
+    if(fin->info == NULL)
+    {
+        free(fin);
+        return 0;
+    }
+
+    memcpy(fin->info, dato, tamBytes);
+    fin->tamInfo = tamBytes;
+    fin->sig = NULL;
+    *pl = fin;
+
+    return 1;
+}
+
+
+int verPrimero(const Lista *pl, void *dato, unsigned tamBytes)
+{
+    if(*pl == NULL)
+        return 0;
+    memcpy(dato, (*pl)->info, minimo(tamBytes, (*pl)->tamInfo));
+    return 1;
+}
+
+
+int sacarPrimeroLista(Lista *pl, void *dato, unsigned tamBytes)
+{
+    tNodo *sacar = *pl;
+
+    if(sacar == NULL)
+        return 0;
+
+    *pl = sacar->sig;
+    memcpy(dato, sacar->info, minimo(tamBytes, sacar->tamInfo));
+    free(sacar->info);
+    free(sacar);
+
+    return 1;
+}
+
+
+void vaciarLista(Lista *pl)
+{
+    while (*pl)
+    {
+        tNodo *elim = *pl;
+        *pl = elim->sig;
+        free(elim->sig);
+        free(elim);
+    }
+}
+
+
+int listaLlena(const Lista *pl, unsigned tamBytes)
+{
+    tNodo *aux = malloc(sizeof(tNodo));
+    void *dato = malloc(tamBytes);
+
+    free(aux);
+    free(dato);
+
+    return aux == NULL || dato == NULL;
+}
+
+
+int listaVacia(const Lista *pl)
+{
+    return *pl == NULL;
+}
+
+
+void crearLista(Lista *pl)
+{
+    *pl = NULL;
+}
+
+
 
 Fecha& Fecha::operator ++() //preincremento ++fecha
 {
